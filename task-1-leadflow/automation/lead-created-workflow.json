@@ -5,7 +5,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "leadflow/new-lead",
-        "responseMode": "usingRespondToWebhook",
+        "responseMode": "responseNode",
         "options": {}
       },
       "id": "dd94429e-fbfe-41b7-8433-8b14b4f10001",

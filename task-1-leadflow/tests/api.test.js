@@ -28,9 +28,11 @@ test('n8n workflow validates and normalizes lead events', () => {
   const workflow = JSON.parse(
     readFileSync(path.join(__dirname, '..', 'automation', 'lead-created-workflow.json'), 'utf8'),
   );
+  const webhookNode = workflow.nodes.find((node) => node.name === 'Receive new lead');
   const validationCode = workflow.nodes.find(
     (node) => node.name === 'Validate and log lead',
   ).parameters.jsCode;
+  assert.equal(webhookNode.parameters.responseMode, 'responseNode');
   const validateLead = new Function('$input', validationCode);
   const lead = {
     _id: '507f1f77bcf86cd799439011',
