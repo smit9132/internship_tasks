@@ -153,7 +153,7 @@ router.patch('/:id', async (req, res) => {
   validateLeadPayload(req.body, { partial: true });
 
   const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   });
 
