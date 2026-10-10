@@ -1,0 +1,84 @@
+{
+  "name": "LeadFlow - Validate and log new lead",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "leadflow/new-lead",
+        "responseMode": "usingRespondToWebhook",
+        "options": {}
+      },
+      "id": "dd94429e-fbfe-41b7-8433-8b14b4f10001",
+      "name": "Receive new lead",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        300
+      ],
+      "webhookId": "leadflow-new-lead"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body ?? $json;\nconst lead = payload.lead;\nconst requiredTextFields = ['_id', 'name', 'email', 'phone', 'company', 'source', 'enquiry'];\nconst allowedStatuses = ['New', 'Contacted', 'Qualified', 'Converted', 'Lost'];\n\nif (payload.event !== 'lead.created' || !lead || typeof lead !== 'object' || Array.isArray(lead)) {\n  throw new Error('Expected a lead.created event with a lead object.');\n}\n\nfor (const field of requiredTextFields) {\n  if (typeof lead[field] !== 'string' || lead[field].trim() === '') {\n    throw new Error(`Lead field \"${field}\" is required.`);\n  }\n}\n\n                if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(lead.email.trim())) {\n  throw new Error('Lead email is invalid.');\n}\n\nif (!allowedStatuses.includes(lead.status)) {\n  throw new Error('Lead status is invalid.');\n}\n\nreturn [{\n  json: {\n    event: payload.event,\n    receivedAt: new Date().toISOString(),\n    lead: {\n      _id: lead._id,\n      name: lead.name.trim(),\n      email: lead.email.trim().toLowerCase(),\n      phone: lead.phone.trim(),\n      company: lead.company.trim(),\n      source: lead.source.trim(),\n      enquiry: lead.enquiry.trim(),\n      status: lead.status,\n      createdAt: lead.createdAt ?? null,\n      updatedAt: lead.updatedAt ?? null\n    }\n  }\n}];"
+      },
+      "id": "dd94429e-fbfe-41b7-8433-8b14b4f10002",
+      "name": "Validate and log lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Lead validated and recorded in this n8n execution.', leadId: $json.lead._id } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "dd94429e-fbfe-41b7-8433-8b14b4f10003",
+      "name": "Acknowledge to LeadFlow",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        760,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Receive new lead": {
+      "main": [
+        [
+          {
+            "node": "Validate and log lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate and log lead": {
+      "main": [
+        [
+          {
+            "node": "Acknowledge to LeadFlow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "versionId": "dd94429e-fbfe-41b7-8433-8b14b4f10004",
+  "tags": []
+}

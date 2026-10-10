@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
+const { notifyLeadCreated } = require('../automation/n8n');
 const Lead = require('../models/Lead');
 
 const router = express.Router();
@@ -81,6 +82,7 @@ function validateLeadId(id) {
 router.post('/', async (req, res) => {
   validateLeadPayload(req.body);
   const lead = await Lead.create(req.body);
+  await notifyLeadCreated(lead);
 
   res.status(201).json({
     success: true,

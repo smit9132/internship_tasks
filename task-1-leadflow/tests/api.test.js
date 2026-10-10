@@ -1,9 +1,11 @@
 require('dotenv').config();
 
 const assert = require('node:assert/strict');
+const { readFileSync } = require('node:fs');
 const { once } = require('node:events');
 const { after, before, test } = require('node:test');
 const mongoose = require('mongoose');
+const path = require('node:path');
 
 const app = require('../app');
 const connectDB = require('../config/db');
@@ -11,11 +13,59 @@ const Lead = require('../models/Lead');
 
 const testSuffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const testEmail = `leadflow-test-${testSuffix}@example.test`;
+const webhookFailureEmail = `leadflow-webhook-failure-${testSuffix}@example.test`;
+const webhookOfflineEmail = `leadflow-webhook-offline-${testSuffix}@example.test`;
 const testName = `LeadFlow API Test ${testSuffix}`;
 const testSource = `Test-${testSuffix}`;
 
 let server;
 let baseUrl;
+let webhookServer;
+let webhookBaseUrl;
+const webhookEvents = [];
+
+test('n8n workflow validates and normalizes lead events', () => {
+  const workflow = JSON.parse(
+    readFileSync(path.join(__dirname, '..', 'automation', 'lead-created-workflow.json'), 'utf8'),
+  );
+  const validationCode = workflow.nodes.find(
+    (node) => node.name === 'Validate and log lead',
+  ).parameters.jsCode;
+  const validateLead = new Function('$json', validationCode);
+  const lead = {
+    _id: '507f1f77bcf86cd799439011',
+    name: '  Alex Example  ',
+    email: '  ALEX@EXAMPLE.TEST  ',
+    phone: '+1 555 0100',
+    company: 'Example Co',
+    source: 'Website',
+    enquiry: 'Interested in a demo.',
+    status: 'New',
+  };
+
+  const result = validateLead({ event: 'lead.created', lead })[0].json;
+  assert.equal(result.event, 'lead.created');
+  assert.equal(result.lead.name, 'Alex Example');
+  assert.equal(result.lead.email, 'alex@example.test');
+  assert.throws(
+    () => validateLead({ event: 'lead.updated', lead }),
+    /Expected a lead\.created event/,
+  );
+  assert.throws(
+    () => validateLead({
+      event: 'lead.created',
+      lead: { ...lead, email: 'not-an-email' },
+    }),
+    /Lead email is invalid/,
+  );
+  assert.throws(
+    () => validateLead({
+      event: 'lead.created',
+      lead: { ...lead, status: 'Unknown' },
+    }),
+    /Lead status is invalid/,
+  );
+});
 
 async function request(path, { method = 'GET', body, rawBody } = {}) {
   const headers = {};
@@ -44,17 +94,44 @@ before(async () => {
   server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
   baseUrl = `http://127.0.0.1:${server.address().port}`;
+
+  webhookServer = require('node:http').createServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+    webhookEvents.push({
+      url: req.url,
+      body: JSON.parse(Buffer.concat(chunks).toString('utf8')),
+    });
+    if (req.url === '/offline') {
+      req.socket.destroy();
+      return;
+    }
+    res.writeHead(req.url === '/failure' ? 503 : 200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ received: true }));
+  });
+  webhookServer.listen(0, '127.0.0.1');
+  await once(webhookServer, 'listening');
+  webhookBaseUrl = `http://127.0.0.1:${webhookServer.address().port}`;
 });
 
 after(async () => {
   try {
-    await Lead.deleteMany({ email: testEmail });
+    await Lead.deleteMany({
+      email: { $in: [testEmail, webhookFailureEmail, webhookOfflineEmail] },
+    });
   } finally {
-    if (server) {
-      await new Promise((resolve, reject) => {
-        server.close((error) => (error ? reject(error) : resolve()));
-      });
-    }
+    await Promise.all(
+      [server, webhookServer]
+        .filter(Boolean)
+        .map(
+          (httpServer) =>
+            new Promise((resolve, reject) => {
+              httpServer.close((error) => (error ? reject(error) : resolve()));
+            }),
+        ),
+    );
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
     }
@@ -81,6 +158,7 @@ test('Lead API supports CRUD and returns useful validation errors', async (t) =>
   });
 
   await t.test('creates a lead with a default status and timestamps', async () => {
+    process.env.N8N_WEBHOOK_URL = webhookBaseUrl;
     const result = await request('/api/leads', { method: 'POST', body: payload });
 
     assert.equal(result.status, 201);
@@ -92,6 +170,46 @@ test('Lead API supports CRUD and returns useful validation errors', async (t) =>
     assert.ok(result.body.data.createdAt);
     assert.ok(result.body.data.updatedAt);
     leadId = result.body.data._id;
+
+    assert.equal(webhookEvents.length, 1);
+    assert.equal(webhookEvents[0].body.event, 'lead.created');
+    assert.equal(webhookEvents[0].body.lead._id, leadId);
+    assert.equal(webhookEvents[0].body.lead.email, testEmail);
+    assert.ok(webhookEvents[0].body.sentAt);
+  });
+
+  await t.test('keeps the lead saved when the n8n webhook returns an error', async () => {
+    process.env.N8N_WEBHOOK_URL = `${webhookBaseUrl}/failure`;
+    const payloadWithFailureEmail = {
+      ...payload,
+      name: `${testName} Webhook Failure`,
+      email: webhookFailureEmail,
+    };
+    const result = await request('/api/leads', {
+      method: 'POST',
+      body: payloadWithFailureEmail,
+    });
+
+    assert.equal(result.status, 201);
+    assert.equal(result.body.data.email, webhookFailureEmail);
+    assert.ok(await Lead.findOne({ email: webhookFailureEmail }));
+    assert.equal(webhookEvents.at(-1).url, '/failure');
+  });
+
+  await t.test('keeps the lead saved when n8n cannot be reached', async () => {
+    process.env.N8N_WEBHOOK_URL = `${webhookBaseUrl}/offline`;
+    const result = await request('/api/leads', {
+      method: 'POST',
+      body: {
+        ...payload,
+        name: `${testName} Webhook Offline`,
+        email: webhookOfflineEmail,
+      },
+    });
+
+    assert.equal(result.status, 201);
+    assert.equal(result.body.data.email, webhookOfflineEmail);
+    assert.ok(await Lead.findOne({ email: webhookOfflineEmail }));
   });
 
   await t.test('rejects duplicate email addresses with HTTP 409', async () => {
