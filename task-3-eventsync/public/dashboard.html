@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f8f8f5">
+  <title>My events — EventSync</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css"><script src="/js/api.js" defer></script><script src="/js/dashboard.js" defer></script>
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="/"><span class="brand-mark">e</span> event<span>sync</span></a><nav class="main-nav"><a class="nav-link" href="/">Discover</a><a class="nav-link active" href="/dashboard.html">My events</a></nav><div class="header-actions" id="header-actions"></div></header>
+  <main class="dashboard-page page-width" id="dashboard-root"><div class="loading-panel"><span class="spinner"></span><span>Getting your dashboard ready…</span></div></main>
+  <dialog class="form-dialog" id="event-dialog" aria-labelledby="event-dialog-title"><button class="dialog-close" type="button" aria-label="Close dialog">×</button><span class="eyebrow">Make it happen</span><h2 id="event-dialog-title">Create an event</h2><form id="event-form" class="event-form"></form></dialog>
+  <dialog class="form-dialog" id="attendees-dialog" aria-labelledby="attendees-title"><button class="dialog-close" type="button" aria-label="Close dialog">×</button><span class="eyebrow">The people showing up</span><h2 id="attendees-title">Attendee list</h2><div id="attendee-list"></div></dialog>
+  <footer class="site-footer"><a class="brand" href="/"><span class="brand-mark">e</span> event<span>sync</span></a><span>Thoughtfully bringing people together.</span><span>© <span id="year"></span> EventSync</span></footer>
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
