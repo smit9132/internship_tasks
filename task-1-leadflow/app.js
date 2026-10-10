@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('node:path');
 
 const errorHandler = require('./middleware/errorHandler');
 const leadRoutes = require('./routes/leadRoutes');
@@ -21,6 +22,8 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/leads', leadRoutes);
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res) => {
   res.status(404).json({

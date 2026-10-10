@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="LeadFlow helps you organize leads and keep your sales pipeline moving."
+    />
+    <meta name="theme-color" content="#f5f7fb" />
+    <title>LeadFlow — Lead management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="/" aria-label="LeadFlow home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <path d="M6 23.5 13.1 8l4.1 9 2.4-4.5L26 23.5" />
+              <path d="M8 23.5h16" />
+            </svg>
+          </span>
+          <span>leadflow<span class="brand-period">.</span></span>
+        </a>
+
+        <p class="sidebar-label">WORKSPACE</p>
+        <nav class="sidebar-nav">
+          <a class="nav-link active" href="#dashboard" aria-current="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+              <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+              <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+              <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+            </svg>
+            Overview
+          </a>
+          <a class="nav-link" href="#leads">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="9" cy="8" r="3.25" />
+              <path d="M3.75 19v-1.5a5.25 5.25 0 0 1 10.5 0V19" />
+              <path d="M16 5.25a3.25 3.25 0 0 1 0 6.3M17 14a5.25 5.25 0 0 1 3.25 4.85V19" />
+            </svg>
+            Leads
+            <span class="nav-count" id="sidebar-lead-count">—</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="sidebar-note">
+            <span class="note-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="m12 3 1.4 5.6L19 10l-5.6 1.4L12 17l-1.4-5.6L5 10l5.6-1.4L12 3Z" />
+                <path d="m19 15 .7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7L19 15Z" />
+              </svg>
+            </span>
+            <strong>Your pipeline, in sync.</strong>
+            <span>Every conversation starts somewhere.</span>
+          </div>
+          <div class="profile">
+            <div class="profile-avatar" aria-hidden="true">LF</div>
+            <div class="profile-copy">
+              <strong>LeadFlow workspace</strong>
+              <span>Sales team</span>
+            </div>
+            <span class="online-dot" title="Workspace active"></span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-content" id="dashboard">
+        <header class="topbar">
+          <div class="breadcrumbs"><span>Workspace</span><span>/</span><strong>Overview</strong></div>
+          <div class="topbar-right">
+            <span class="today-label" id="today-label"></span>
+            <span class="topbar-avatar" aria-label="LeadFlow workspace">LF</span>
+          </div>
+        </header>
+
+        <section class="page-content" aria-labelledby="page-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">YOUR SALES WORKSPACE</p>
+              <h1 id="page-title">Good work starts with a lead.</h1>
+              <p class="page-subtitle">Keep every opportunity moving in the right direction.</p>
+            </div>
+            <button class="button button-primary" id="add-lead-button" type="button">
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M10 4v12M4 10h12" />
+              </svg>
+              Add a lead
+            </button>
+          </div>
+
+          <section class="metrics-grid" aria-label="Lead summary">
+            <article class="metric-card metric-total">
+              <div class="metric-top">
+                <span>Total leads</span>
+                <span class="metric-icon icon-violet" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M16 20v-1.7a3.3 3.3 0 0 0-3.3-3.3H7.3A3.3 3.3 0 0 0 4 18.3V20" />
+                    <circle cx="10" cy="7" r="3.5" />
+                    <path d="M16 11.5a3.5 3.5 0 1 0 0-7M20 20v-1.7a3.3 3.3 0 0 0-2.5-3.2" />
+                  </svg>
+                </span>
+              </div>
+              <strong class="metric-value" id="metric-total">—</strong>
+              <span class="metric-foot">All opportunities in your workspace</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span>New leads</span>
+                <span class="metric-icon icon-blue" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </span>
+              </div>
+              <strong class="metric-value" id="metric-new">—</strong>
+              <span class="metric-foot"><span class="metric-dot dot-blue"></span>Ready for a first conversation</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span>Qualified</span>
+                <span class="metric-icon icon-amber" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="m5 12 4.3 4.3L19 6.8" />
+                  </svg>
+                </span>
+              </div>
+              <strong class="metric-value" id="metric-qualified">—</strong>
+              <span class="metric-foot"><span class="metric-dot dot-amber"></span>Strong fit for your offering</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span>Converted</span>
+                <span class="metric-icon icon-green" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="m5 12 4.3 4.3L19 6.8" />
+                  </svg>
+                </span>
+              </div>
+              <strong class="metric-value" id="metric-converted">—</strong>
+              <span class="metric-foot"><span class="metric-dot dot-green"></span>Relationships in motion</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span>Lost</span>
+                <span class="metric-icon icon-rose" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="m7 7 10 10M17 7 7 17" />
+                  </svg>
+                </span>
+              </div>
+              <strong class="metric-value" id="metric-lost">—</strong>
+              <span class="metric-foot"><span class="metric-dot dot-rose"></span>Closed opportunities</span>
+            </article>
+          </section>
+
+          <section class="leads-panel" id="leads" aria-labelledby="leads-title">
+            <div class="panel-heading">
+              <div>
+                <h2 id="leads-title">All leads <span class="panel-count" id="visible-lead-count">—</span></h2>
+                <p>Manage your pipeline and follow every opportunity.</p>
+              </div>
+              <button class="button button-secondary refresh-button" id="refresh-button" type="button">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M16 8a6 6 0 0 0-10.2-2L4 8M4 4v4h4M4 12a6 6 0 0 0 10.2 2L16 12m0 4v-4h-4" />
+                </svg>
+                Refresh
+              </button>
+            </div>
+
+            <div class="toolbar">
+              <label class="search-box" for="search-input">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <circle cx="8.8" cy="8.8" r="5.8" />
+                  <path d="m13.2 13.2 4 4" />
+                </svg>
+                <input
+                  id="search-input"
+                  type="search"
+                  maxlength="100"
+                  placeholder="Search name, email, or company"
+                  autocomplete="off"
+                />
+                <kbd>⌘ K</kbd>
+              </label>
+              <label class="filter-select">
+                <span class="sr-only">Filter by status</span>
+                <select id="status-filter">
+                  <option value="">All statuses</option>
+                  <option value="New">New</option>
+                  <option value="Contacted">Contacted</option>
+                  <option value="Qualified">Qualified</option>
+                  <option value="Converted">Converted</option>
+                  <option value="Lost">Lost</option>
+                </select>
+              </label>
+              <label class="filter-select">
+                <span class="sr-only">Filter by source</span>
+                <select id="source-filter">
+                  <option value="">All sources</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">LEAD</th>
+                    <th scope="col">COMPANY</th>
+                    <th scope="col">SOURCE</th>
+                    <th scope="col">STATUS</th>
+                    <th scope="col">CREATED</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="leads-table-body">
+                  <tr><td class="table-message" colspan="6">Loading your leads…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="panel-footer">
+              <span id="table-summary">Loading leads…</span>
+              <span class="footer-live"><span class="online-dot"></span>Connected to your workspace</span>
+            </div>
+          </section>
+
+          <footer class="page-footer">
+            <span>LeadFlow <span aria-hidden="true">·</span> Made for meaningful follow-ups.</span>
+            <button class="text-button" id="footer-refresh-button" type="button">Check for updates</button>
+          </footer>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="lead-dialog" id="lead-dialog" aria-labelledby="dialog-title">
+      <form id="lead-form" novalidate>
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">LEAD DETAILS</p>
+            <h2 id="dialog-title">Add a lead</h2>
+            <p class="dialog-subtitle">Start with the details you know. You can update them anytime.</p>
+          </div>
+          <button class="icon-button" id="close-dialog-button" type="button" aria-label="Close form">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" /></svg>
+          </button>
+        </div>
+        <div class="form-grid">
+          <label class="form-field">
+            <span>Full name <span class="required">*</span></span>
+            <input name="name" type="text" maxlength="100" autocomplete="name" placeholder="e.g. Alex Morgan" required />
+          </label>
+          <label class="form-field">
+            <span>Work email <span class="required">*</span></span>
+            <input name="email" type="email" maxlength="254" autocomplete="email" placeholder="alex@company.com" required />
+          </label>
+          <label class="form-field">
+            <span>Phone number <span class="required">*</span></span>
+            <input name="phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+1 (555) 000-0000" required />
+          </label>
+          <label class="form-field">
+            <span>Company <span class="required">*</span></span>
+            <input name="company" type="text" maxlength="120" autocomplete="organization" placeholder="Company name" required />
+          </label>
+          <label class="form-field">
+            <span>Lead source <span class="required">*</span></span>
+            <input name="source" type="text" maxlength="80" placeholder="e.g. Website, Referral" required />
+          </label>
+          <label class="form-field" id="status-field">
+            <span>Pipeline status</span>
+            <select name="status">
+              <option>New</option>
+              <option>Contacted</option>
+              <option>Qualified</option>
+              <option>Converted</option>
+              <option>Lost</option>
+            </select>
+          </label>
+          <label class="form-field form-field-wide">
+            <span>What are they looking for? <span class="required">*</span></span>
+            <textarea name="enquiry" rows="3" maxlength="2000" placeholder="A quick note about their needs…" required></textarea>
+            <span class="field-hint">Keep a short note to make your next conversation count.</span>
+          </label>
+        </div>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button class="button button-secondary" id="cancel-dialog-button" type="button">Cancel</button>
+          <button class="button button-primary" id="save-lead-button" type="submit">
+            <span id="save-button-label">Save lead</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
