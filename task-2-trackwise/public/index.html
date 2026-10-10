@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrackWise</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">TrackWise</div>
+        <nav class="nav">
+          <button class="nav-item active" data-view="dashboard">Dashboard</button>
+          <button class="nav-item" data-view="assistant">AI Assistant</button>
+          <button class="nav-item" data-view="expenses">Expenses</button>
+          <button class="nav-item" data-view="habits">Habits</button>
+          <button class="nav-item" data-view="tasks">Tasks</button>
+          <button class="nav-item" data-view="settings">Settings / AI status</button>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <h1 id="pageTitle">Dashboard</h1>
+          <div class="status-pill" id="aiStatus">AI unavailable</div>
+        </header>
+
+        <section id="view-dashboard" class="view active">
+          <div class="cards-grid">
+            <article class="card stat-card">
+              <span>Today's spending</span>
+              <strong id="todaySpending">₹0</strong>
+            </article>
+            <article class="card stat-card">
+              <span>This month's spending</span>
+              <strong id="monthSpending">₹0</strong>
+            </article>
+            <article class="card stat-card">
+              <span>Habits completion</span>
+              <strong id="habitCompletionRate">0%</strong>
+            </article>
+            <article class="card stat-card">
+              <span>Pending tasks</span>
+              <strong id="pendingTasks">0</strong>
+            </article>
+          </div>
+
+          <div class="dashboard-columns">
+            <div class="card">
+              <h3>Recent expenses</h3>
+              <div id="recentExpenses" class="list-stack"></div>
+            </div>
+            <div class="card">
+              <h3>Upcoming tasks</h3>
+              <div id="upcomingTasks" class="list-stack"></div>
+            </div>
+          </div>
+
+          <div class="dashboard-columns">
+            <div class="card">
+              <h3>Category breakdown</h3>
+              <div id="categoryBreakdown" class="chart-list"></div>
+            </div>
+            <div class="card">
+              <h3>Monthly trend</h3>
+              <div id="monthlyTrend" class="chart-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-assistant" class="view">
+          <div class="card chat-card">
+            <div id="chatMessages" class="chat-messages"></div>
+            <form id="chatForm" class="chat-form">
+              <input id="chatInput" placeholder="Try: I spent 150 rupees on lunch today" />
+              <button type="submit">Send</button>
+            </form>
+          </div>
+        </section>
+
+        <section id="view-expenses" class="view">
+          <div class="panel-actions">
+            <form id="expenseFilterForm" class="filters-row">
+              <input id="expenseSearch" placeholder="Search description" />
+              <select id="expenseCategoryFilter">
+                <option value="">All categories</option>
+                <option>Food</option>
+                <option>Transport</option>
+                <option>Shopping</option>
+                <option>Education</option>
+                <option>Health</option>
+                <option>Bills</option>
+                <option>Other</option>
+              </select>
+              <input id="expenseStartDate" type="date" />
+              <input id="expenseEndDate" type="date" />
+              <button type="submit">Apply</button>
+            </form>
+            <button class="secondary" id="openExpenseModal">Add expense</button>
+          </div>
+          <div class="card table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Amount</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expenseTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="view-habits" class="view">
+          <div class="panel-actions">
+            <button class="secondary" id="openHabitModal">Add habit</button>
+          </div>
+          <div class="card habits-grid" id="habitList"></div>
+        </section>
+
+        <section id="view-tasks" class="view">
+          <div class="panel-actions">
+            <select id="taskFilterStatus">
+              <option value="">All tasks</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <select id="taskFilterPriority">
+              <option value="">All priorities</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+            <button class="secondary" id="openTaskModal">Add task</button>
+          </div>
+          <div class="card table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Priority</th>
+                  <th>Due date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="taskTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="view-settings" class="view">
+          <div class="card settings-card">
+            <h3>AI status</h3>
+            <div id="settingsAiStatus"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="expenseModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Add expense</h3>
+        <form id="expenseForm" class="form-grid">
+          <input name="amount" type="number" step="0.01" placeholder="Amount" required />
+          <select name="category" required>
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Education">Education</option>
+            <option value="Health">Health</option>
+            <option value="Bills">Bills</option>
+            <option value="Other">Other</option>
+          </select>
+          <input name="description" placeholder="Description" required />
+          <input name="date" type="date" required />
+          <input name="currency" value="INR" />
+          <div class="form-actions">
+            <button type="submit">Save</button>
+            <button type="button" class="secondary close-modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="habitModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Add habit</h3>
+        <form id="habitForm" class="form-grid">
+          <input name="name" placeholder="Habit name" required />
+          <input name="description" placeholder="Description" />
+          <select name="frequency">
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Custom">Custom</option>
+          </select>
+          <div class="form-actions">
+            <button type="submit">Save</button>
+            <button type="button" class="secondary close-modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="taskModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Add task</h3>
+        <form id="taskForm" class="form-grid">
+          <input name="title" placeholder="Task title" required />
+          <input name="description" placeholder="Description" />
+          <input name="dueDate" type="date" />
+          <select name="priority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+          <div class="form-actions">
+            <button type="submit">Save</button>
+            <button type="button" class="secondary close-modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+  </body>
+</html>
