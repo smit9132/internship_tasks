@@ -31,7 +31,7 @@ test('n8n workflow validates and normalizes lead events', () => {
   const validationCode = workflow.nodes.find(
     (node) => node.name === 'Validate and log lead',
   ).parameters.jsCode;
-  const validateLead = new Function('$json', validationCode);
+  const validateLead = new Function('$input', validationCode);
   const lead = {
     _id: '507f1f77bcf86cd799439011',
     name: '  Alex Example  ',
@@ -43,25 +43,27 @@ test('n8n workflow validates and normalizes lead events', () => {
     status: 'New',
   };
 
-  const result = validateLead({ event: 'lead.created', lead })[0].json;
+  const result = validateLead({ first: () => ({ json: { event: 'lead.created', lead } }) })[0].json;
   assert.equal(result.event, 'lead.created');
   assert.equal(result.lead.name, 'Alex Example');
   assert.equal(result.lead.email, 'alex@example.test');
   assert.throws(
-    () => validateLead({ event: 'lead.updated', lead }),
+    () => validateLead({ first: () => ({ json: { event: 'lead.updated', lead } }) }),
     /Expected a lead\.created event/,
   );
   assert.throws(
     () => validateLead({
-      event: 'lead.created',
-      lead: { ...lead, email: 'not-an-email' },
+      first: () => ({
+        json: { event: 'lead.created', lead: { ...lead, email: 'not-an-email' } },
+      }),
     }),
     /Lead email is invalid/,
   );
   assert.throws(
     () => validateLead({
-      event: 'lead.created',
-      lead: { ...lead, status: 'Unknown' },
+      first: () => ({
+        json: { event: 'lead.created', lead: { ...lead, status: 'Unknown' } },
+      }),
     }),
     /Lead status is invalid/,
   );
