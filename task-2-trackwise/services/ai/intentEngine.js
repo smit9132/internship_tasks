@@ -39,19 +39,30 @@ function getCategoryFromText(text) {
   return 'Other';
 }
 
+function cleanExpenseDescription(text) {
+  const withoutAmount = text
+    .replace(/(?:rs\.?|rupees?|inr|₹|usd|dollars?)\b/gi, ' ')
+    .replace(/\d+(?:\.\d{1,2})?/g, ' ')
+    .replace(/\b(?:i|me|my|spent|paid|bought|purchase|for|on|at|today|yesterday|tomorrow|this|that|the|a|an)\b/gi, ' ')
+    .replace(/[^\w\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return withoutAmount || 'Expense';
+}
+
 function parseExpenseCommand(text) {
   const amount = extractAmount(text);
   if (!amount || !Number.isFinite(amount) || amount <= 0) {
     return null;
   }
-  const description = text.replace(/(spent|paid|bought|purchase|on|for|i spent|i paid|i bought)/gi, '').trim();
-  const finalDescription = description || 'Expense';
+
   return {
     type: 'expense',
     payload: {
       amount,
       category: getCategoryFromText(text),
-      description: finalDescription,
+      description: cleanExpenseDescription(text),
       date: getDateFromText(text),
       currency: 'INR',
     },
@@ -59,9 +70,11 @@ function parseExpenseCommand(text) {
 }
 
 async function parseTaskCommand(text) {
-  const titleMatch = text.match(/add task(?: to)?\s+(.+?)(?: due| tomorrow| today| next| on |$)/i);
-  const title = titleMatch ? titleMatch[1].trim() : null;
+  const normalized = text.trim();
+  const match = normalized.match(/(?:please\s+)?(?:add|create|new|schedule|plan|set)\s+(?:a\s+)?(?:task|todo)\s+(?:to\s+|for\s+|about\s+)?(.+?)(?=\s+(?:due|tomorrow|today|next|on)|$)/i);
+  const title = match ? match[1].trim() : null;
   if (!title) return null;
+
   const dueDate = /tomorrow/i.test(text) ? new Date(Date.now() + 86400000) : /today/i.test(text) ? new Date() : null;
   const priority = /high/i.test(text) ? 'High' : /low/i.test(text) ? 'Low' : 'Medium';
   return {
@@ -71,9 +84,13 @@ async function parseTaskCommand(text) {
 }
 
 async function parseHabitCommand(text) {
-  if (!/completed my .*habit|completed .*habit|workout habit|habit today|habit/i.test(text)) return null;
-  const nameMatch = text.match(/(?:completed|did|finished)\s+(?:my\s+)?(.+?)(?:\s+habit|$)/i);
-  const name = nameMatch ? nameMatch[1].trim() : 'Habit';
+  const lower = text.toLowerCase();
+  if (!/\b(?:completed|did|done|finished|marked|logged)\b/i.test(lower) || !/\bhabit\b/i.test(lower)) {
+    return null;
+  }
+
+  const match = text.match(/(?:completed|did|done|finished|marked|logged)\s+(?:my\s+)?(.+?)(?:\s+habit\b|$)/i);
+  const name = match ? match[1].trim() : 'Habit';
 
   if (mongoose.connection.readyState !== 1) {
     let existing = memoryStore.habits.find(h => h.name.toLowerCase().includes(name.toLowerCase()));

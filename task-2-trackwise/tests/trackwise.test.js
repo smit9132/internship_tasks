@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { parseExpenseCommand, parseTaskCommand, executeIntentIntent } = require('../services/ai/intentEngine');
+const { parseExpenseCommand, parseTaskCommand, parseHabitCommand, executeIntentIntent } = require('../services/ai/intentEngine');
 const { getExpenseStats } = require('../services/expenses/expenseService');
 const { memoryStore } = require('../services/store');
 
@@ -18,6 +18,7 @@ test('parseExpenseCommand recognizes rupee expenditure', () => {
   assert.equal(result.type, 'expense');
   assert.equal(result.payload.amount, 150);
   assert.equal(result.payload.category, 'Food');
+  assert.equal(result.payload.description, 'lunch');
   assert.equal(result.payload.currency, 'INR');
 });
 
@@ -27,6 +28,14 @@ test('parseTaskCommand recognizes task creation intent', async () => {
   assert.equal(result.type, 'task');
   assert.match(result.payload.title, /finish my assignment/i);
   assert.equal(result.payload.priority, 'Medium');
+});
+
+test('parseHabitCommand ignores habit questions and recognizes completed habits', async () => {
+  assert.equal(await parseHabitCommand('What habits do I need to complete today'), null);
+  const result = await parseHabitCommand('I completed my workout habit');
+  assert.ok(result);
+  assert.equal(result.type, 'habit_complete');
+  assert.ok(String(result.payload.habitId));
 });
 
 test('executeIntentIntent records expense in memory fallback mode', async () => {
