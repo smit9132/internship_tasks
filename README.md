@@ -19,3 +19,10 @@ A local personal productivity assistant for expenses, habits, and tasks.
 
 - [TrackWise setup and usage guide](./task-2-trackwise/README.md)
 - [TrackWise application source](./task-2-trackwise/)
+
+### Task 3 — EventSync: Event Management System
+
+A full-stack event management platform for discovering events, managing attendee registrations, and administering users and events.
+
+- [EventSync setup, API, security, and deployment guide](./task-3-eventsync/README.md)
+- [EventSync application source](./task-3-eventsync/)
