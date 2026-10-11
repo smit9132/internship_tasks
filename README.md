@@ -26,3 +26,10 @@ A full-stack event management platform for discovering events, managing attendee
 
 - [EventSync setup, API, security, and deployment guide](./task-3-eventsync/README.md)
 - [EventSync application source](./task-3-eventsync/)
+
+### Task 4 — Vision Guard: Computer Vision Monitoring
+
+A local-first browser face-detection monitoring demo with explicit camera consent, configurable presence rules, a timestamped event feed, and optional MongoDB session metadata.
+
+- [Vision Guard setup, privacy, API, and deployment guide](./task-4-vision-guard/README.md)
+- [Vision Guard application source](./task-4-vision-guard/)
